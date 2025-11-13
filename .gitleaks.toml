@@ -1,8 +1,8 @@
-﻿[extend]
+[extend]
 useDefault = true
 
 [[rules]]
 id = "firebase-api-key"
 description = "Firebase API key detected"
 regex = "AIza[0-9A-Za-z\-_]{35}"
-keywords = ["AIza" ]
+keywords = ["AIza"]
