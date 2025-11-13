@@ -17,5 +17,5 @@ jobs:
       - name: Run gitleaks
         uses: gitleaks/gitleaks-action@v2
         with:
-          config: .gitleaks.toml
-          args: "detect --redact --verbose"
+          config-path: .gitleaks.toml
+          args: --no-banner --redact
