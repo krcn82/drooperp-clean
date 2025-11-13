@@ -1,0 +1,1081 @@
+
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user within a tenant.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user."
+        },
+        "tenantId": {
+          "type": "string",
+          "description": "Reference to Tenant. (Relationship: Tenant 1:N User)"
+        },
+        "email": {
+          "type": "string",
+          "description": "User's email address.",
+          "format": "email"
+        },
+        "firstName": {
+          "type": "string",
+          "description": "User's first name."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "User's last name."
+        },
+        "subscriptionId": {
+          "type": "string",
+          "description": "Reference to Subscription. (Relationship: Subscription 1:N User)"
+        },
+        "role": {
+          "type": "string",
+          "description": "User's role",
+          "enum": [
+            "admin",
+            "cashier",
+            "viewer"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "tenantId",
+        "email",
+        "role"
+      ]
+    },
+    "Tenant": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Tenant",
+      "type": "object",
+      "description": "Represents a company or organization using the ERP system.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the tenant."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the tenant."
+        },
+        "domain": {
+          "type": "string",
+          "description": "Domain name associated with the tenant."
+        },
+        "subscriptionId": {
+          "type": "string",
+          "description": "Reference to Subscription. (Relationship: Subscription 1:N Tenant)"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "active",
+            "inactive",
+            "deleted"
+          ],
+          "description": "The current status of the tenant."
+        },
+        "active": {
+          "type": "boolean"
+        },
+        "defaultLocale": {
+          "type": "string",
+          "enum": ["de", "en", "tr"]
+        },
+        "posMode": {
+          "type": "string",
+          "enum": ["retail", "restaurant"]
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
+    },
+    "Category": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "Category",
+        "type": "object",
+        "description": "Represents a product category.",
+        "properties": {
+            "name": {
+                "type": "object",
+                "properties": {
+                    "de": {"type": "string"},
+                    "en": {"type": "string"}
+                }
+            },
+            "sort": {"type": "number"},
+            "icon": {"type": "string"}
+        },
+        "required": ["name"]
+    },
+    "Product": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Product",
+      "type": "object",
+      "description": "Represents a product or service.",
+      "properties": {
+        "name": {
+            "type": "object",
+            "properties": {
+                "de": {"type": "string"},
+                "en": {"type": "string"}
+            }
+        },
+        "price": {"type": "number"},
+        "unit": {"type": "string", "enum": ["Stück", "Einheit"]},
+        "categoryId": {"type": "string"},
+        "imageUrl": {"type": "string"},
+        "taxRate": {"type": "number"},
+        "sku": {"type": "string"},
+        "isAvailable": {"type": "boolean"},
+        "quantity": {
+            "type": "number",
+            "description": "The current stock quantity of the product."
+        }
+      },
+      "required": [
+        "name",
+        "price"
+      ]
+    },
+    "Customer": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "Customer",
+        "type": "object",
+        "description": "Represents a customer.",
+        "properties": {
+            "fullName": {"type": "string"},
+            "email": {"type": "string", "format": "email"},
+            "phone": {"type": "string"},
+            "loyaltyPoints": {"type": "number"},
+            "vipTier": {
+                "type": "string",
+                "enum": ["none", "silver", "gold", "platinum"]
+            },
+            "createdAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "lastVisit": {
+                "type": "string",
+                "format": "date-time"
+            },
+            "visits": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "orderId": {"type": "string"},
+                        "total": {"type": "number"},
+                        "pointsEarned": {"type": "number"},
+                        "date": {"type": "string", "format": "date-time"}
+                    }
+                }
+            }
+        },
+        "required": ["fullName"]
+    },
+    "Order": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "Order",
+        "type": "object",
+        "description": "Represents a POS order.",
+        "properties": {
+            "mode": {"type": "string", "enum": ["retail", "restaurant"]},
+            "status": {"type": "string", "enum": ["open", "paid", "void", "kitchen", "served"]},
+            "customerId": {"type": "string"},
+            "items": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "productId": {"type": "string"},
+                        "name": {
+                            "type": "object",
+                            "properties": { "de": {"type": "string"}, "en": {"type": "string"}}
+                        },
+                        "qty": {"type": "number"},
+                        "price": {"type": "number"},
+                        "taxRate": {"type": "number"},
+                        "note": {"type": "string"}
+                    }
+                }
+            },
+            "payments": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "method": {"type": "string", "enum": ["cash", "card", "external"]},
+                        "amount": {"type": "number"}
+                    }
+                }
+            },
+            "subtotal": {"type": "number"},
+            "taxTotal": {"type": "number"},
+            "grandTotal": {"type": "number"},
+            "createdAt": {"type": "string", "format": "date-time"},
+            "closedAt": {"type": "string", "format": "date-time"},
+            "rksv": {
+                "type": "object",
+                "properties": {
+                    "hash": {"type": "string"},
+                    "signature": {"type": "string"},
+                    "chainPrevHash": {"type": "string"}
+                }
+            }
+        },
+        "required": ["mode", "status", "items", "grandTotal", "createdAt"]
+    },
+     "Table": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "Table",
+        "type": "object",
+        "description": "Represents a table in a restaurant.",
+        "properties": {
+            "name": {"type": "string"},
+            "seats": {"type": "number"},
+            "status": {"type": "string", "enum": ["free", "occupied", "serving"]},
+            "currentOrderId": {"type": "string"}
+        },
+        "required": ["name", "status"]
+    },
+    "KDSOrder": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "KDS Order",
+        "type": "object",
+        "description": "Represents an order for the Kitchen Display System.",
+        "properties": {
+            "orderId": {"type": "string"},
+            "tableId": {"type": "string"},
+            "tenantId": {"type": "string"},
+            "items": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "productId": {"type": "string"},
+                        "name": {
+                             "type": "object",
+                            "properties": { "de": {"type": "string"}, "en": {"type": "string"}}
+                        },
+                        "qty": {"type": "number"},
+                        "seat": {"type": "number"}
+                    }
+                }
+            },
+            "status": {"type": "string", "enum": ["new", "preparing", "ready", "served"]},
+            "createdAt": {"type": "string", "format": "date-time"}
+        },
+        "required": ["orderId", "items", "status", "createdAt"]
+    },
+    "Plan": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Plan",
+      "type": "object",
+      "description": "Represents a subscription plan.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the plan."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the plan (e.g., 'Free', 'Standard')."
+        },
+        "price": {
+          "type": "number",
+          "description": "Price of the plan."
+        },
+        "features": {
+          "type": "array",
+          "description": "Features included in the plan.",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "price"
+      ]
+    },
+    "Subscription": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Subscription",
+      "type": "object",
+      "description": "Represents a user subscription to a particular plan.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the subscription."
+        },
+        "planId": {
+          "type": "string",
+          "description": "Reference to Plan. (Relationship: Plan 1:N Subscription)"
+        },
+        "startDate": {
+          "type": "string",
+          "description": "Date when the subscription started.",
+          "format": "date-time"
+        },
+        "endDate": {
+          "type": "string",
+          "description": "Date when the subscription ends.",
+          "format": "date-time"
+        },
+        "tenantId": {
+          "type": "string",
+          "description": "Reference to Tenant. (Relationship_ Tenant 1:N Subscription)"
+        }
+      },
+      "required": [
+        "id",
+        "planId",
+        "startDate",
+        "endDate"
+      ]
+    },
+    "UserTenant": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserTenant",
+      "type": "object",
+      "description": "Maps a user's UID to their tenant ID.",
+      "properties": {
+        "tenantId": {
+          "type": "string",
+          "description": "The ID of the tenant the user belongs to."
+        }
+      },
+      "required": [
+        "tenantId"
+      ]
+    },
+    "Settings": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Settings",
+      "type": "object",
+      "description": "Represents tenant-specific settings.",
+      "properties": {
+        "companyName": {
+          "type": "string",
+          "description": "The name of the company."
+        },
+        "themeColor": {
+          "type": "string",
+          "description": "The primary color for the UI theme."
+        },
+        "paymentBridgeUrl": {
+          "type": "string",
+          "description": "The local network URL for the payment device bridge."
+        }
+      }
+    },
+    "ModuleSettings": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Module Settings",
+      "type": "object",
+      "description": "Represents the enabled/disabled state of various application modules for a tenant.",
+      "properties": {
+        "posShop": {
+          "type": "boolean",
+          "description": "Point of Sale (Shop)"
+        },
+        "posRestaurant": {
+          "type": "boolean",
+          "description": "Point of Sale (Restaurant)"
+        },
+        "calendar": {
+          "type": "boolean",
+          "description": "Calendar Module"
+        },
+        "kiosk": {
+          "type": "boolean",
+          "description": "Kiosk Mode"
+        },
+        "aiAssistant": {
+          "type": "boolean",
+          "description": "AI Assistant"
+        }
+      }
+    },
+    "AutomationRules": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Automation Rules",
+      "type": "object",
+      "description": "Configurable rules for the automation worker.",
+      "properties": {
+        "highOrderVolumeThreshold": {
+          "type": "number",
+          "description": "Transaction count in the last 10 mins to trigger a high volume alert."
+        },
+        "lowStockThreshold": {
+          "type": "number",
+          "description": "The stock quantity below which a low stock alert is triggered."
+        },
+        "integrationTimeoutMinutes": {
+          "type": "number",
+          "description": "The number of minutes after which an inactive integration triggers an alert."
+        },
+        "dailySummaryEnabled": {
+          "type": "boolean",
+          "description": "Whether to send the daily summary notification."
+        }
+      }
+    },
+    "ChatMessage": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ChatMessage",
+      "type": "object",
+      "description": "Represents a single message in an AI chat.",
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "The content of the message."
+        },
+        "role": {
+          "type": "string",
+          "description": "The role of the message sender.",
+          "enum": [
+            "user",
+            "model"
+          ]
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The time the message was sent."
+        }
+      },
+      "required": [
+        "text",
+        "role",
+        "timestamp"
+      ]
+    },
+    "RKSVKey": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "RKSV Key",
+      "type": "object",
+      "description": "Represents the RKSV signing key information for a tenant.",
+      "properties": {
+        "publicKey": {
+          "type": "string",
+          "description": "The public key for transaction signature verification."
+        },
+        "rksvActive": {
+          "type": "boolean",
+          "description": "Flag indicating if RKSV signing is active for the tenant."
+        },
+        "lastSignature": {
+          "type": "string",
+          "description": "The signature of the most recent transaction, used for chaining."
+        }
+      },
+      "required": [
+        "publicKey",
+        "rksvActive",
+        "lastSignature"
+      ]
+    },
+    "RKSVConfig": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "RKSV Config",
+      "type": "object",
+      "description": "Stores the fiscal certificate and credentials for RKSV compliance.",
+      "properties": {
+        "kassenId": {
+          "type": "string",
+          "description": "The official ID for the cash register."
+        },
+        "certificate": {
+          "type": "string",
+          "description": "The RKSV certificate content."
+        },
+        "privateKey": {
+          "type": "string",
+          "description": "The RKSV private key. Should be stored securely, e.g., in Secret Manager."
+        },
+        "serialNumber": {
+          "type": "string",
+          "description": "The ATU serial number."
+        },
+        "registeredAt": {
+          "type": "string",
+          "description": "The authority where the cash register is registered, e.g., 'FinanzOnline'."
+        },
+        "lastZReport": {
+          "type": "string",
+          "format": "date",
+          "description": "The date of the last successful Z-Report."
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "active",
+            "inactive"
+          ],
+          "description": "The status of the RKSV configuration."
+        },
+        "useSandbox": {
+          "type": "boolean",
+          "description": "Flag to use the FinanzOnline sandbox environment."
+        },
+        "finanzOnlineSubId": {
+          "type": "string",
+          "description": "The subscriber ID for FinanzOnline API."
+        },
+        "finanzOnlineUser": {
+          "type": "string",
+          "description": "The user ID for FinanzOnline API."
+        },
+        "finanzOnlinePassword": {
+          "type": "string",
+          "description": "The password for FinanzOnline API. Should be stored in Secret Manager."
+        },
+        "signatureType": {
+          "type": "string",
+          "enum": ["atrust_online", "usb"],
+          "description": "The selected RKSV signature provider."
+        },
+        "aTrustUser": {
+          "type": "string",
+          "description": "Username for A-Trust Online. Stored in Secret Manager."
+        },
+        "aTrustPassword": {
+          "type": "string",
+          "description": "Password for A-Trust Online. Stored in Secret Manager."
+        }
+      },
+      "required": [
+        "kassenId",
+        "certificate",
+        "privateKey",
+        "serialNumber",
+        "status"
+      ]
+    },
+    "Signature": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Signature",
+      "type": "object",
+      "description": "Represents a single cryptographic signature in the RKSV chain.",
+      "properties": {
+        "hash": {
+          "type": "string",
+          "description": "The SHA-256 hash of the current data and previous hash."
+        },
+        "signature": {
+          "type": "string",
+          "description": "The cryptographic signature of the hash."
+        },
+        "previousHash": {
+          "type": "string",
+          "description": "The hash of the previous signature in the chain."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the signature was created."
+        }
+      },
+      "required": [
+        "hash",
+        "signature",
+        "previousHash",
+        "createdAt"
+      ]
+    },
+    "Integration": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Integration",
+      "type": "object",
+      "description": "Stores credentials and status for a third-party integration.",
+      "properties": {
+        "apiKey": {
+          "type": "string",
+          "description": "Encrypted API key for the third-party service."
+        },
+        "connectedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the integration was connected."
+        },
+        "lastSync": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of the last successful data sync."
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "active",
+            "disconnected",
+            "error"
+          ],
+          "description": "The current status of the integration."
+        }
+      },
+      "required": [
+        "apiKey",
+        "connectedAt",
+        "status"
+      ]
+    },
+    "POSOrder": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "POS Order",
+      "type": "object",
+      "description": "Represents an order originating from an external Point-of-Sale or delivery platform.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the order, usually from the external platform."
+        },
+        "tenantId": {
+          "type": "string",
+          "description": "The tenant this order belongs to."
+        },
+        "customer": {
+          "type": "object",
+          "description": "Customer information."
+        },
+        "items": {
+          "type": "array",
+          "description": "The items included in the order."
+        },
+        "totalAmount": {
+          "type": "number",
+          "description": "The total amount of the order."
+        },
+        "paymentType": {
+          "type": "string",
+          "description": "How the order was paid (e.g., 'card', 'cash_on_delivery')."
+        },
+        "source": {
+          "type": "string",
+          "description": "The platform the order originated from (e.g., 'wolt', 'foodora')."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp of when the order was placed."
+        }
+      },
+      "required": [
+        "id",
+        "tenantId",
+        "totalAmount",
+        "source",
+        "timestamp"
+      ]
+    },
+    "AuditLog": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Audit Log",
+      "type": "object",
+      "description": "Logs an incoming API call from an external platform.",
+      "properties": {
+        "platform": {
+          "type": "string",
+          "description": "The originating platform (e.g., 'wolt')."
+        },
+        "endpoint": {
+          "type": "string",
+          "description": "The specific webhook endpoint that was hit."
+        },
+        "receivedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of when the webhook was received."
+        },
+        "payloadHash": {
+          "type": "string",
+          "description": "A SHA256 hash of the incoming payload for verification."
+        },
+        "status": {
+            "type": "string",
+            "enum": ["success", "failed"],
+            "description": "The outcome of processing the webhook."
+        }
+      },
+      "required": ["platform", "receivedAt", "payloadHash", "status"]
+    },
+    "Notification": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Notification",
+      "type": "object",
+      "description": "Represents a notification for a user within a tenant.",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "The title of the notification."
+        },
+        "message": {
+          "type": "string",
+          "description": "The main content of the notification."
+        },
+        "type": {
+          "type": "string",
+          "enum": ["info", "alert", "success", "insight"],
+          "description": "The type of notification, which can be used for styling."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the notification was created."
+        },
+        "read": {
+          "type": "boolean",
+          "description": "Whether the notification has been read by the user."
+        }
+      },
+      "required": ["title", "message", "type", "timestamp", "read"]
+    },
+    "Mail": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Mail",
+      "type": "object",
+      "description": "Represents an email to be sent by an extension.",
+      "properties": {
+        "to": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Array of recipient email addresses."
+        },
+        "message": {
+          "type": "object",
+          "properties": {
+            "subject": { "type": "string" },
+            "html": { "type": "string" }
+          },
+          "required": ["subject", "html"]
+        }
+      },
+      "required": ["to", "message"]
+    },
+    "Payment": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Payment",
+      "type": "object",
+      "description": "Represents a payment for a transaction.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the payment."
+        },
+        "tenantId": {
+          "type": "string",
+          "description": "Reference to the Tenant."
+        },
+        "transactionId": {
+          "type": "string",
+          "description": "Reference to the Transaction."
+        },
+        "cashRegisterId": {
+          "type": "string",
+          "description": "Reference to the active cash register session."
+        },
+        "method": {
+          "type": "string",
+          "enum": ["cash", "card", "stripe", "bankomat"],
+          "description": "Payment method used."
+        },
+        "amount": {
+          "type": "number",
+          "description": "Amount paid."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of the payment."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["completed", "failed", "pending"],
+          "description": "Status of the payment."
+        },
+        "deviceResponse": {
+            "type": "object",
+            "description": "The raw response object from the payment device."
+        }
+      },
+      "required": ["id", "tenantId", "transactionId", "method", "amount", "timestamp", "status"]
+    },
+    "StripePaymentIntent": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Stripe Payment Intent",
+      "type": "object",
+      "description": "Response from creating a Stripe Payment Intent.",
+      "properties": {
+        "clientSecret": {
+          "type": "string",
+          "description": "The client secret for the Stripe Payment Intent."
+        }
+      },
+      "required": ["clientSecret"]
+    },
+    "CashRegister": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Cash Register",
+      "type": "object",
+      "description": "Represents a cash drawer session for a cashier.",
+      "properties": {
+        "id": { "type": "string", "description": "Unique ID for the session." },
+        "tenantId": { "type": "string" },
+        "cashierId": { "type": "string", "description": "The UID of the user who opened the session." },
+        "cashierName": { "type": "string" },
+        "status": { "type": "string", "enum": ["open", "closed"] },
+        "openingBalance": { "type": "number" },
+        "closingBalance": { "type": "number" },
+        "totalSales": { "type": "number" },
+        "totalCashSales": { "type": "number" },
+        "openedAt": { "type": "string", "format": "date-time" },
+        "closedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "tenantId", "cashierId", "status", "openingBalance", "openedAt"]
+    },
+    "Report": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Report",
+      "type": "object",
+      "description": "Represents a generated report, like a Z-Bericht.",
+      "properties": {
+        "id": { "type": "string" },
+        "tenantId": { "type": "string" },
+        "type": { "type": "string", "enum": ["z-report", "daily-summary"] },
+        "generatedAt": { "type": "string", "format": "date-time" },
+        "data": { "type": "object", "description": "The raw data used to generate the report." },
+        "fileUrl": { "type": "string", "description": "URL to the generated PDF/CSV file in Cloud Storage." }
+      },
+      "required": ["id", "tenantId", "type", "generatedAt", "data"]
+    },
+    "FinanzOnlineLog": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "FinanzOnline Submission Log",
+        "type": "object",
+        "description": "Logs the result of a submission to the FinanzOnline API.",
+        "properties": {
+            "date": { "type": "string", "format": "date" },
+            "result": { "type": "string", "description": "The raw response from the FinanzOnline API." },
+            "status": { "type": "string", "enum": ["success", "error"] },
+            "createdAt": { "type": "string", "format": "date-time" }
+        },
+        "required": ["date", "result", "status", "createdAt"]
+    },
+    "SystemError": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "System Error",
+        "type": "object",
+        "description": "Represents a system error log entry.",
+        "properties": {
+            "fn": { "type": "string", "description": "The name of the function where the error occurred." },
+            "details": { "type": "string", "description": "A detailed error message or stack trace." },
+            "severity": { "type": "string", "enum": ["warning", "error", "critical"] },
+            "createdAt": { "type": "string", "format": "date-time" }
+        },
+        "required": ["fn", "details", "severity", "createdAt"]
+    },
+    "Display": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Display",
+      "type": "object",
+      "description": "Represents the state of a customer-facing display.",
+      "properties": {
+        "total": {
+          "type": "number",
+          "description": "The current total to be displayed."
+        },
+        "customer": {
+          "type": "object",
+          "properties": {
+            "name": {"type": "string"},
+            "loyaltyPoints": {"type": "number"},
+            "bonusActive": {"type": "boolean"}
+          }
+        },
+        "status": {
+          "type": "string",
+          "enum": ["idle", "processing", "completed"],
+          "description": "The current payment status."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of the last update."
+        }
+      }
+    }
+  },
+  "auth": {
+    "providers": [
+      "password"
+    ]
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/UserTenant"
+      },
+      "description": "Top-level collection to map user UIDs to tenant IDs for security rules."
+    },
+    "/tenants/{tenantId}": {
+      "schema": {
+        "$ref": "#/entities/Tenant"
+      },
+      "description": "Collection to store tenant information."
+    },
+     "/tenants/{tenantId}/categories/{categoryId}": {
+        "schema": { "$ref": "#/entities/Category" },
+        "description": "Sub-collection for product categories within a tenant."
+    },
+    "/tenants/{tenantId}/products/{productId}": {
+      "schema": {
+        "$ref": "#/entities/Product"
+      },
+      "description": "Sub-collection for all products within a tenant."
+    },
+    "/tenants/{tenantId}/customers/{customerId}": {
+        "schema": { "$ref": "#/entities/Customer" },
+        "description": "Sub-collection for customers within a tenant."
+    },
+    "/tenants/{tenantId}/orders/{orderId}": {
+        "schema": { "$ref": "#/entities/Order" },
+        "description": "Sub-collection for POS orders within a tenant."
+    },
+    "/tenants/{tenantId}/tables/{tableId}": {
+        "schema": { "$ref": "#/entities/Table" },
+        "description": "Sub-collection for restaurant tables within a tenant."
+    },
+    "/tenants/{tenantId}/tables/{tableId}/orders/{orderId}": {
+      "schema": { "$ref": "#/entities/KDSOrder" },
+      "description": "Sub-collection for kitchen orders within a specific table."
+    },
+    "/tenants/{tenantId}/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/User"
+      },
+      "description": "Sub-collection for users within a tenant."
+    },
+    "/tenants/{tenantId}/payments/{paymentId}": {
+      "schema": {
+        "$ref": "#/entities/Payment"
+      },
+      "description": "Sub-collection for payments within a tenant."
+    },
+    "/tenants/{tenantId}/settings/general": {
+      "schema": {
+        "$ref": "#/entities/Settings"
+      },
+      "description": "Document for general settings within a tenant."
+    },
+    "/tenants/{tenantId}/settings/modules": {
+      "schema": {
+        "$ref": "#/entities/ModuleSettings"
+      },
+      "description": "Document for module settings within a tenant."
+    },
+    "/tenants/{tenantId}/settings/automationRules": {
+        "schema": {
+            "$ref": "#/entities/AutomationRules"
+        },
+        "description": "Document for automation rule settings within a tenant."
+    },
+    "/tenants/{tenantId}/rksvConfig": {
+      "schema": {
+        "$ref": "#/entities/RKSVConfig"
+      },
+      "description": "Singleton document for RKSV fiscal certificate and configuration for a tenant."
+    },
+    "/tenants/{tenantId}/signatures/{signatureId}": {
+      "schema": {
+        "$ref": "#/entities/Signature"
+      },
+      "description": "Sub-collection for the RKSV cryptographic signature chain."
+    },
+    "/tenants/{tenantId}/zReports/{reportId}": {
+      "schema": {
+        "$ref": "#/entities/Report"
+      },
+      "description": "Sub-collection for daily Z-Reports (Tagesabschluss)."
+    },
+    "/tenants/{tenantId}/integrations/{platformId}": {
+      "schema": {
+        "$ref": "#/entities/Integration"
+      },
+      "description": "Stores credentials and status for third-party integrations like Wolt or Foodora."
+    },
+    "/tenants/{tenantId}/cashRegisters/{registerId}": {
+      "schema": {
+        "$ref": "#/entities/CashRegister"
+      },
+      "description": "Sub-collection for cash register sessions."
+    },
+    "/tenants/{tenantId}/reports/{reportId}": {
+      "schema": {
+        "$ref": "#/entities/Report"
+      },
+      "description": "Sub-collection for generated reports."
+    },
+    "/tenants/{tenantId}/finanzOnlineLogs/{logId}": {
+        "schema": {
+            "$ref": "#/entities/FinanzOnlineLog"
+        },
+        "description": "Sub-collection for logging FinanzOnline API submissions."
+    },
+    "/tenants/{tenantId}/systemErrors/{errorId}": {
+        "schema": {
+            "$ref": "#/entities/SystemError"
+        },
+        "description": "Sub-collection for logging critical system errors within a tenant."
+    },
+    "/global/plans/{planId}": {
+      "schema": {
+        "$ref": "#/entities/Plan"
+      },
+      "description": "Global collection for subscription plans."
+    },
+    "/tenants/{tenantId}/aiChats/{chatId}/messages/{messageId}": {
+      "schema": {
+        "$ref": "#/entities/ChatMessage"
+      },
+      "description": "Sub-collection for messages within an AI chat session."
+    },
+    "/tenants/{tenantId}/posOrders/{orderId}": {
+      "schema": {
+        "$ref": "#/entities/POSOrder"
+      },
+      "description": "Sub-collection for orders from external POS/delivery platforms."
+    },
+    "/tenants/{tenantId}/auditLogs/{logId}": {
+        "schema": {
+            "$ref": "#/entities/AuditLog"
+        },
+        "description": "Sub-collection for logging incoming webhook API calls."
+    },
+    "/tenants/{tenantId}/notifications/{notificationId}": {
+      "schema": {
+        "$ref": "#/entities/Notification"
+      },
+      "description": "Sub-collection for user and system notifications within a tenant."
+    },
+    "/mail/{mailId}": {
+      "schema": {
+        "$ref": "#/entities/Mail"
+      },
+      "description": "Collection for triggering email sending via Firebase Extensions (e.g., SendGrid, Mailgun)."
+    },
+    "/tenants/{tenantId}/display/current": {
+        "schema": { "$ref": "#/entities/Display" },
+        "description": "Singleton document to control the state of the customer-facing display."
+    }
+  }
+}
